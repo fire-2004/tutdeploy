@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Revaldi - Firebase</title>
+    <style>
+        /* Gaya Sederhana tapi Modern */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+        }
+        .card {
+            background-color: #1e293b;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: center;
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid #334155;
+        }
+        h1 { font-size: 22px; margin-bottom: 10px; color: #38bdf8; }
+        
+        /* Profile UI */
+        #user-photo {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            border: 3px solid #38bdf8;
+            margin-bottom: 10px;
+        }
+        .user-name { font-size: 20px; font-weight: bold; margin: 5px 0; }
+        .user-email { color: #94a3b8; font-size: 14px; margin-bottom: 20px; }
+
+        /* JSON Box */
+        .json-box {
+            background: #000;
+            color: #4ade80;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: left;
+            font-family: monospace;
+            font-size: 11px;
+            overflow-x: auto;
+            max-height: 250px;
+            border: 1px solid #166534;
+        }
+
+        /* Buttons */
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: 0.2s;
+        }
+        #btn-login { background-color: #ffffff; color: #1e293b; }
+        #btn-logout { background-color: #ef4444; color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div id="auth-ui">
+            <h1>Firebase Auth</h1>
+            <p style="color: #94a3b8;">Ketuk tombol di bawah untuk masuk</p>
+            <button id="btn-login">Login dengan Google</button>
+        </div>
+
+        <div id="profile-ui" style="display: none;">
+            <img id="user-photo" src="" alt="Profile">
+            <div class="user-name" id="display-name"></div>
+            <div class="user-email" id="display-email"></div>
+            
+            <div style="text-align: left; font-size: 12px; color: #38bdf8; margin-bottom: 5px;">RAW JSON:</div>
+            <pre class="json-box" id="json-display"></pre>
+            
+            <button id="btn-logout">Logout / Sign Out</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+
+        // Konfigurasi Project eb8f6
+        const firebaseConfig = {
+          apiKey: "AIzaSyDUs1G-nzJwL78GsaUQX-BmbRz6QSW6_kU",
+          authDomain: "testing-eb8f6.firebaseapp.com",
+          projectId: "testing-eb8f6",
+          storageBucket: "testing-eb8f6.firebasestorage.app",
+          messagingSenderId: "264152153312",
+          appId: "1:264152153312:web:75fbc799ee8bd4fa5f2485",
+          measurementId: "G-Y6JKT7W4TK"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        const authUi = document.getElementById('auth-ui');
+        const profileUi = document.getElementById('profile-ui');
+
+        // FUNGSI LOGIN (Sesuai kode yang berhasil kamu pakai)
+        document.getElementById('btn-login').onclick = async () => {
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (err) {
+                alert("Login Error: " + err.message);
+            }
+        };
+
+        // FUNGSI LOGOUT
+        document.getElementById('btn-logout').onclick = async () => {
+            await signOut(auth);
+        };
+
+        // MONITOR STATUS LOGIN
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Sembunyikan Login, Tampilkan Profil
+                authUi.style.display = 'none';
+                profileUi.style.display = 'block';
+
+                document.getElementById('display-name').innerText = user.displayName;
+                document.getElementById('display-email').innerText = user.email;
+                document.getElementById('user-photo').src = user.photoURL;
+                
+                // Tampilkan JSON yang kamu inginkan
+                const cleanData = {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName,
+                    photoURL: user.photoURL,
+                    providerData: user.providerData
+                };
+                document.getElementById('json-display').innerText = JSON.stringify(cleanData, null, 2);
+            } else {
+                // Tampilkan Login, Sembunyikan Profil
+                authUi.style.display = 'block';
+                profileUi.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
